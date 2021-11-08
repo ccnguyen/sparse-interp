@@ -19,8 +19,6 @@ class TreeMultiQuad(nn.Module):
     def _find_idx(self, mask):
         '''
         Given a mask, find the idxs that are the closest
-        @param mask:
-        @return:
         '''
         img = torch.ones((self.sz, self.sz)).cuda()
         holed_img = img * mask
@@ -45,6 +43,7 @@ class TreeMultiQuad(nn.Module):
         return idx, dist, filled_idx, unfilled_idx
 
     def _fill(self, holed_img, params):
+        ''' Given idxs that need to be filled, fill them in, weighted by distance '''
         idx, dist, filled_idx, unfilled_idx = params
         vals = 0
         for i in range(self.k):
@@ -90,7 +89,7 @@ class TreeMultiRandom(nn.Module):
     '''
     Use for irregularly interspaced data to be interpolated into full resolution
     '''
-    def __init__(self, sz=512, k=4, num_channels=8):
+    def __init__(self, sz=512, k=3, num_channels=8):
         super().__init__()
         self.k = k # number of neighboring points to search
         self.sz = sz
@@ -107,8 +106,8 @@ class TreeMultiRandom(nn.Module):
         filled_idx = (holed_img != 0).nonzero()
         unfilled_idx = (holed_img == 0).nonzero()
 
-        filled_idx_n = norm_coord(filled_idx, self.sz)  # num_coords, 2
-        unfilled_idx_n = norm_coord(unfilled_idx, self.sz)  # num_coords, 2
+        filled_idx_n = norm_coord(filled_idx, self.sz)  # size: num_coords, 2
+        unfilled_idx_n = norm_coord(unfilled_idx, self.sz)  # size: num_coords, 2
 
         tree = KDTree(filled_idx_n)
         dist, idx = tree.query(unfilled_idx_n, k=self.k)
@@ -123,7 +122,7 @@ class TreeMultiRandom(nn.Module):
         vals = 0
         for i in range(self.k):
             # find coords of the points which are knn
-            idx_select = filled_idx[idx[:, i]]  # num_coords, 2
+            idx_select = filled_idx[idx[:, i]]  # size: num_coords, 2
 
             # add value of those coords, weighted by their distance
             vals += holed_img[idx_select[:, 0], idx_select[:, 1]] * dist[:, i]
@@ -136,7 +135,7 @@ class TreeMultiRandom(nn.Module):
 
         stacked = torch.zeros((self.num_channels, self.sz, self.sz)).cuda()
 
-        for i in range(1, self.num_channels + 1):
+        for i in range(0, self.num_channels):
             mask = (self.lookup_table == i)
             holed_img = coded[0, 0, :, :] * mask
             params = self._find_idx(mask)
