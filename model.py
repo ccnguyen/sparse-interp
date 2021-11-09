@@ -1,6 +1,7 @@
 import torch.nn as nn
 from interpolate import TreeMultiQuad, TreeMultiRandom
 import torch
+from debayer import Debayer3x3
 
 
 class TreeModel(nn.Module):
@@ -22,7 +23,7 @@ class TreeModel(nn.Module):
             self.tree = TreeMultiQuad(sz=sz)
         else:
             # irregular spaced points
-            self.tree = TreeMultiRandom(sz=sz, num_channels=6)
+            self.tree = TreeMultiRandom(sz=sz, num_channels=num_channels)
 
     def forward(self, coded, lookup_channels=None):
         ''' Coded is the single channel image we want to stack into multiple channels '''
@@ -30,6 +31,16 @@ class TreeModel(nn.Module):
             return self.tree(coded, lookup_channels)
         else:
             return self.tree(coded)
+
+
+class InterpModel(nn.Module):
+    ''' Can use a bilinear interpolation module for comparison'''
+    def __init__(self):
+        super().__init__()
+        self.interp = Debayer3x3().cuda()
+
+    def forward(self, coded):
+        return self.interp(coded)
 
 
 if __name__ == '__main__':

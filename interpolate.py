@@ -51,8 +51,8 @@ class TreeMultiQuad(nn.Module):
             idx_select = filled_idx[idx[:, i]]  # size: num_coords, 2
 
             # add value of those coords, weighted by their distance
-            vals += holed_img[idx_select[:, 0], idx_select[:, 1]] * dist[:, i]
-        vals /= torch.sum(dist, dim=1)
+            vals += holed_img[idx_select[:, 0], idx_select[:, 1]] * (1.0 / dist[:, i])
+        vals /= torch.sum((1.0 / dist), dim=1)
         holed_img[unfilled_idx[:, 0], unfilled_idx[:, 1]] = vals
         return holed_img
 
@@ -125,8 +125,8 @@ class TreeMultiRandom(nn.Module):
             idx_select = filled_idx[idx[:, i]]  # size: num_coords, 2
 
             # add value of those coords, weighted by their distance
-            vals += holed_img[idx_select[:, 0], idx_select[:, 1]] * dist[:, i]
-        vals /= torch.sum(dist, dim=1)
+            vals += holed_img[idx_select[:, 0], idx_select[:, 1]] * (1.0 / dist[:, i])
+        vals /= torch.sum((1.0 / dist), dim=1)
         holed_img[unfilled_idx[:, 0], unfilled_idx[:, 1]] = vals
         return holed_img
 
