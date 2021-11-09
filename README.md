@@ -5,12 +5,9 @@ Toolbox for interpolating from an uneven grid.
 Classes are written for a regularly sampled grid (e.g. Bayer array) or an
 irregularly sampled grid. The input is a single channel with values at regular
 or irregular grid points, and the output is multiple channel image with values
-interpolated from whichever points correspond to that channel (given a lookup table).
+interpolated from whichever points correspond to that channel (given a lookup table). Can be used as a differentiable PyTorch nn.Module.
 
-Can be used as a differentiable PyTorch nn.Module.
-
-- Multi-class Poisson disk sampling on a dense grid
-Implemented as described in Wei 2009. 
+- Multi-class Poisson disk sampling on a dense grid. Implemented as described in Wei 2009. 
 
 ## Getting started
 Use the model in `model.py` to interpolate an image. An example is given there.
